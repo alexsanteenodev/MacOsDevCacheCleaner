@@ -392,7 +392,7 @@ struct ContentView: View {
                 .buttonStyle(.borderless)
                 .help("Quit Dev Cache Cleaner")
             }
-            .padding(10)
+            .padding(12)
             .background(Color(NSColor.windowBackgroundColor))
             
             Divider()
@@ -425,8 +425,8 @@ struct ContentView: View {
                         }
                         #endif
                     }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color(NSColor.controlBackgroundColor))
                     
@@ -434,18 +434,21 @@ struct ContentView: View {
                     ForEach($cacheOptions) { $option in
                         CacheOptionRow(option: $option)
                             .opacity(option.isAvailable ? 1 : 0.6)
-                            .padding(.horizontal)
-                            .padding(.vertical, 6)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
                     }
                 }
             }
             
-            VStack(spacing: 8) {
+            Divider()
+            
+            VStack(spacing: 12) {
                 if let error = errorMessage {
                     Text(error)
                         .font(.caption)
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)
+                        .padding(.horizontal)
                 }
                 
                 if let date = lastCleanedDate {
@@ -458,16 +461,18 @@ struct ContentView: View {
                     if isLoading {
                         ProgressView()
                             .controlSize(.small)
+                            .frame(maxWidth: .infinity)
                     } else {
                         Text("Clean Selected")
-                            .frame(minWidth: 100)
+                            .frame(maxWidth: .infinity)
                     }
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .disabled(isLoading || !cacheOptions.contains { $0.isSelected })
+                .padding(.horizontal)
             }
-            .padding()
+            .padding(.vertical, 16)
             .background(Color(NSColor.windowBackgroundColor))
         }
         .frame(width: 320, height: 500)
@@ -679,14 +684,14 @@ struct CacheOptionRow: View {
     @Binding var option: CacheOption
     
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .top, spacing: 10) {
             Toggle("", isOn: $option.isSelected)
                 .toggleStyle(.checkbox)
                 .disabled(!option.isAvailable)
             
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(option.title)
-                    .font(.body)
+                    .font(.system(.body, weight: .medium))
                 Text(option.description)
                     .font(.caption)
                     .foregroundColor(.secondary)
