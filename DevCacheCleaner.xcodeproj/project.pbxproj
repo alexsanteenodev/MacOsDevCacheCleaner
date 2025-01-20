@@ -329,6 +329,8 @@
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.tests";
 			};
 			name = Debug;
 		};
@@ -384,6 +386,8 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.tests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.tests";
 			};
 			name = Release;
 		};
@@ -457,11 +461,13 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alexsanteeno.DevCacheCleanerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.uitests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DevCacheCleaner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DevCacheCleaner";
+				BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.uitests";
 			};
 			name = Debug;
 		};
@@ -475,11 +481,13 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 15.1;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.alexsanteeno.DevCacheCleanerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.uitests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/DevCacheCleaner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/DevCacheCleaner";
+				BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.uitests";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.alexsanteeno.DevCacheCleaner.uitests";
 			};
 			name = Release;
 		};
