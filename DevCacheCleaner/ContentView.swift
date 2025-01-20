@@ -105,12 +105,46 @@ struct ContentView: View {
                    }),
         CacheOption(title: "NPM", 
                    description: "Clean NPM cache", 
-                   command: "cache clean --force",
-                   commandName: "npm"),
+                   command: "",
+                   commandName: "",
+                   cleanAction: {
+                       let fileManager = FileManager.default
+                       let homeURL = fileManager.homeDirectoryForCurrentUser
+                       let npmCacheURL = homeURL.appendingPathComponent(".npm/_cacache")
+                       
+                       do {
+                           if fileManager.fileExists(atPath: npmCacheURL.path) {
+                               let contents = try fileManager.contentsOfDirectory(at: npmCacheURL, 
+                                                                               includingPropertiesForKeys: nil)
+                               for url in contents {
+                                   try? fileManager.removeItem(at: url)
+                               }
+                           }
+                       } catch {
+                           throw error
+                       }
+                   }),
         CacheOption(title: "CocoaPods", 
                    description: "Clean CocoaPods cache", 
-                   command: "cache clean --all",
-                   commandName: "pod"),
+                   command: "",
+                   commandName: "",
+                   cleanAction: {
+                       let fileManager = FileManager.default
+                       let homeURL = fileManager.homeDirectoryForCurrentUser
+                       let cocoaPodsURL = homeURL.appendingPathComponent("Library/Caches/CocoaPods")
+                       
+                       do {
+                           if fileManager.fileExists(atPath: cocoaPodsURL.path) {
+                               let contents = try fileManager.contentsOfDirectory(at: cocoaPodsURL, 
+                                                                               includingPropertiesForKeys: nil)
+                               for url in contents {
+                                   try? fileManager.removeItem(at: url)
+                               }
+                           }
+                       } catch {
+                           throw error
+                       }
+                   }),
     ]
     
     @State private var isLoading = false
