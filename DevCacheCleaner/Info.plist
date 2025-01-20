@@ -27,5 +27,7 @@
     <string>1.0</string>
     <key>CFBundleVersion</key>
     <string>1</string>
+    <key>NSSystemAdministrationUsageDescription</key>
+    <string>Access is needed to clean Docker cache and system files.</string>
 </dict>
 </plist> 

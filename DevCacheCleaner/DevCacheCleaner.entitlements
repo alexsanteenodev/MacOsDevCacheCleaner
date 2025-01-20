@@ -3,20 +3,41 @@
 <plist version="1.0">
 <dict>
 	<key>com.apple.security.app-sandbox</key>
-	<false/>
+	<true/>
+	<key>com.apple.security.files.user-selected.executable</key>
+	<true/>
 	<key>com.apple.security.files.user-selected.read-write</key>
+	<true/>
+	<key>com.apple.security.files.downloads.read-write</key>
+	<true/>
+	<key>com.apple.security.files.all</key>
 	<true/>
 	<key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
 	<array>
-		<string>/Library/Caches/</string>
-		<string>/Library/Developer/</string>
-		<string>/.npm/</string>
-		<string>/.nvm/</string>
+		<string>Library/Containers/com.docker.docker/Data/</string>
+		<string>Library/Group Containers/group.com.docker/</string>
+		<string>.docker/</string>
+		<string>.npm/_cacache/</string>
+		<string>Library/Developer/Xcode/DerivedData/</string>
+		<string>Library/Developer/Xcode/Archives/</string>
+		<string>Library/Caches/CocoaPods/</string>
+		<string>.gradle/caches/</string>
+		<string>Library/Caches/Google/AndroidStudio*/</string>
+		<string>Library/Application Support/Google/AndroidStudio*/</string>
+		<string>.android/cache/</string>
+		<string>Library/Application Support/Code/Cache/</string>
+		<string>Library/Application Support/Code/CachedData/</string>
+		<string>Library/Application Support/Code/CachedExtensions/</string>
+		<string>.vscode/extensions/</string>
+		<string>Library/Caches/pip/</string>
+		<string>.cache/pip/</string>
+		<string>**/*.pyc</string>
+		<string>.gem/ruby/</string>
+		<string>Library/Caches/</string>
 	</array>
-	<key>com.apple.security.temporary-exception.files.absolute-path.read-only</key>
+	<key>com.apple.security.temporary-exception.apple-events</key>
 	<array>
-		<string>/opt/homebrew/</string>
-		<string>/usr/local/</string>
+		<string>com.docker.docker</string>
 	</array>
 </dict>
 </plist>
