@@ -29,9 +29,8 @@ final class DevCacheCleanerTests: XCTestCase {
     
     func testDockerCacheOption() {
         let option = CacheOption(title: "Docker", 
-                               description: "Clean Docker system and unused images", 
-                               command: "",
-                               commandName: "")
+                               description: "Clean Docker system and unused images",
+                               cleanAction: nil)
         
         XCTAssertEqual(option.title, "Docker")
         XCTAssertEqual(option.description, "Clean Docker system and unused images")
@@ -53,8 +52,7 @@ final class DevCacheCleanerTests: XCTestCase {
         
         let option = CacheOption(title: "Xcode", 
                                description: "Clean Xcode derived data and archives",
-                               command: "",
-                               commandName: "") {
+                               cleanAction: {
             // Test implementation
             if FileManager.default.fileExists(atPath: derivedData.path) {
                 try FileManager.default.removeItem(at: derivedData)
@@ -62,7 +60,7 @@ final class DevCacheCleanerTests: XCTestCase {
             if FileManager.default.fileExists(atPath: archives.path) {
                 try FileManager.default.removeItem(at: archives)
             }
-        }
+        })
         
         try await option.cleanAction?()
         
@@ -73,8 +71,7 @@ final class DevCacheCleanerTests: XCTestCase {
     func testHomebrewCacheOption() {
         let option = CacheOption(title: "Homebrew",
                                description: "Clean Homebrew cache",
-                               command: "",
-                               commandName: "")
+                               cleanAction: nil)
         
         XCTAssertEqual(option.title, "Homebrew")
         XCTAssertEqual(option.description, "Clean Homebrew cache")
@@ -90,12 +87,11 @@ final class DevCacheCleanerTests: XCTestCase {
         
         let option = CacheOption(title: "NPM",
                                description: "Clean NPM cache",
-                               command: "",
-                               commandName: "") {
+                               cleanAction: {
             if FileManager.default.fileExists(atPath: npmCache.path) {
                 try FileManager.default.removeItem(at: npmCache)
             }
-        }
+        })
         
         try await option.cleanAction?()
         XCTAssertFalse(fileManager.fileExists(atPath: npmCache.path))
@@ -106,14 +102,11 @@ final class DevCacheCleanerTests: XCTestCase {
         let option = CacheOption(
             title: "Test Cache",
             description: "Test Description",
-            command: "test-command",
-            commandName: "test"
+            cleanAction: nil
         )
         
         XCTAssertEqual(option.title, "Test Cache")
         XCTAssertEqual(option.description, "Test Description")
-        XCTAssertEqual(option.command, "test-command")
-        XCTAssertEqual(option.commandName, "test")
         XCTAssertFalse(option.isSelected)
         XCTAssertTrue(option.isAvailable)
         XCTAssertNil(option.error)
@@ -190,8 +183,8 @@ final class DevCacheCleanerTests: XCTestCase {
     // Test multiple cache selections
     func testMultipleCacheSelections() {
         // Create test options
-        var option1 = CacheOption(title: "Test1", description: "Test1 Description", command: "", commandName: "")
-        var option2 = CacheOption(title: "Test2", description: "Test2 Description", command: "", commandName: "")
+        var option1 = CacheOption(title: "Test1", description: "Test1 Description", cleanAction: nil)
+        var option2 = CacheOption(title: "Test2", description: "Test2 Description", cleanAction: nil)
         
         // Test initial state
         XCTAssertFalse(option1.isSelected)
@@ -211,14 +204,15 @@ final class DevCacheCleanerTests: XCTestCase {
         let option = CacheOption(
             title: "Test Cache",
             description: "Test Description",
-            command: "invalid-command",
-            commandName: "invalid"
+            cleanAction: {
+                throw NSError(domain: "", code: 1, userInfo: [NSLocalizedDescriptionKey: "Test error"])
+            }
         )
         
-        // Test invalid command execution
+        // Test error in clean action
         do {
-            try await contentView.executeCommand("invalid-command")
-            XCTFail("Should throw error for invalid command")
+            try await option.cleanAction?()
+            XCTFail("Should throw error")
         } catch {
             XCTAssertNotNil(error)
         }

@@ -34,21 +34,16 @@ struct CacheOption: Identifiable {
     let id = UUID()
     let title: String
     let description: String
-    let command: String
-    let commandName: String
-    var fullPath: String?
+    let cleanAction: (() async throws -> Void)?
     var isSelected: Bool = false
     var isAvailable: Bool = true
     var error: String?
-    var cleanAction: (() async throws -> Void)?
 }
 
 struct ContentView: View {
     @State internal var cacheOptions = [
         CacheOption(title: "Docker", 
                    description: "Clean Docker system and unused images", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        
@@ -107,8 +102,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "Homebrew", 
                    description: "Clean Homebrew cache", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        
@@ -149,8 +142,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "General Library Cache", 
                    description: "Clean Library cache files", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let libraryURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
@@ -167,8 +158,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "Xcode", 
                    description: "Clean Xcode derived data and archives", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -195,8 +184,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "NPM", 
                    description: "Clean NPM cache", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -212,8 +199,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "CocoaPods", 
                    description: "Clean CocoaPods cache", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -233,8 +218,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "Gradle", 
                    description: "Clean Gradle cache", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -250,8 +233,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "Android Studio", 
                    description: "Clean Android Studio caches", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -278,8 +259,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "VS Code", 
                    description: "Clean VS Code caches", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -303,8 +282,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "Python", 
                    description: "Clean Python pip and pyc caches", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -341,8 +318,6 @@ struct ContentView: View {
                    }),
         CacheOption(title: "Ruby Gems", 
                    description: "Clean Ruby Gems cache", 
-                   command: "",
-                   commandName: "",
                    cleanAction: {
                        let fileManager = FileManager.default
                        let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -357,7 +332,7 @@ struct ContentView: View {
                                }
                            }
                        }
-                   }),
+                   })
     ]
     
     @State private var isLoading = false
@@ -483,146 +458,12 @@ struct ContentView: View {
         }
     }
     
-    private func findCommandPath(_ command: String) async throws -> String? {
-        let process = Process()
-        let pipe = Pipe()
-        
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-l", "-c", "which \(command)"]
-        process.standardOutput = pipe
-        process.standardError = pipe
-        
-        #if DEBUG
-        Logger.debug("Finding path for command: \(command)")
-        Logger.debug("Shell: \(process.executableURL?.path ?? "")")
-        Logger.debug("Arguments: \(process.arguments?.joined(separator: " ") ?? "")")
-        #endif
-        
-        try process.run()
-        process.waitUntilExit()
-        
-        let data = try pipe.fileHandleForReading.readToEnd() ?? Data()
-        let output = String(data: data, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        #if DEBUG
-        Logger.command("which \(command)", output: output)
-        #endif
-        
-        if process.terminationStatus == 0 {
-            return output
-        }
-        return nil
-    }
-    
-    private func getVersionCheckCommand(for option: CacheOption) -> String {
-        switch option.commandName {
-        case "npm":
-            // For npm, just check if the command exists since version check requires node
-            return "command -v npm"
-        case "docker":
-            return "docker info"
-        case "pod":
-            return "command -v pod"
-        case "brew":
-            return "command -v brew"
-        default:
-            return "command -v \(option.commandName)"
-        }
-    }
-    
-    internal func executeCommand(_ command: String) async throws {
-        let process = Process()
-        let pipe = Pipe()
-        
-        var env = ProcessInfo.processInfo.environment
-        // Include Homebrew paths for both Intel and Apple Silicon Macs
-        let path = "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin"
-        env["PATH"] = path
-        
-        // Add Homebrew's library path
-        env["DYLD_LIBRARY_PATH"] = "/opt/homebrew/lib:/usr/local/lib"
-        
-        #if DEBUG
-        Logger.debug("Executing command: \(command)")
-        Logger.debug("PATH: \(path)")
-        Logger.debug("DYLD_LIBRARY_PATH: \(env["DYLD_LIBRARY_PATH"] ?? "")")
-        Logger.debug("Shell: /bin/zsh")
-        #endif
-        
-        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
-        process.arguments = ["-l", "-c", command]
-        process.standardOutput = pipe
-        process.standardError = pipe
-        process.environment = env
-        
-        try process.run()
-        process.waitUntilExit()
-        
-        let data = try pipe.fileHandleForReading.readToEnd() ?? Data()
-        let output = String(data: data, encoding: .utf8)
-        
-        #if DEBUG
-        Logger.command(command, output: output)
-        Logger.debug("Exit status: \(process.terminationStatus)")
-        #endif
-        
-        if process.terminationStatus != 0 {
-            if let output = output {
-                throw NSError(domain: "", code: 1, userInfo: [NSLocalizedDescriptionKey: output])
-            }
-        }
-    }
-    
     private func checkAvailableCommands() async {
         for index in cacheOptions.indices {
             let option = cacheOptions[index]
             
-            // Skip check for options that use cleanAction
-            if option.cleanAction != nil {
-                cacheOptions[index].isAvailable = true
-                continue
-            }
-            
-            if option.commandName == "rm" {
-                continue
-            }
-            
-            #if DEBUG
-            Logger.debug("Checking availability for: \(option.title)")
-            #endif
-            
-            do {
-                if let commandPath = try await findCommandPath(option.commandName) {
-                    #if DEBUG
-                    Logger.debug("Found path for \(option.title): \(commandPath)")
-                    #endif
-                    
-                    cacheOptions[index].fullPath = commandPath
-                    // Use the specific check command instead of --version
-                    try await executeCommand(getVersionCheckCommand(for: option))
-                    
-                    cacheOptions[index].isAvailable = true
-                    cacheOptions[index].error = nil
-                    
-                    #if DEBUG
-                    Logger.debug("\(option.title) is available")
-                    #endif
-                } else {
-                    cacheOptions[index].isAvailable = false
-                    cacheOptions[index].error = "\(option.title) is not installed"
-                    
-                    #if DEBUG
-                    Logger.error("\(option.title) path not found")
-                    #endif
-                }
-            } catch {
-                cacheOptions[index].isAvailable = false
-                cacheOptions[index].error = "\(option.title) is not working properly or not running"
-                
-                #if DEBUG
-                Logger.error("\(option.title) check failed", error: error)
-                #endif
-            }
+            // All options use cleanAction, so they are available by default
+            cacheOptions[index].isAvailable = true
         }
     }
     
@@ -632,21 +473,13 @@ struct ContentView: View {
         
         Task {
             for option in cacheOptions where option.isSelected {
-                if !option.isAvailable && option.commandName != "" {
+                if !option.isAvailable {
                     continue
                 }
                 
                 do {
                     if let cleanAction = option.cleanAction {
                         try await cleanAction()
-                    } else {
-                        let fullCommand: String
-                        if let path = option.fullPath {
-                            fullCommand = "\(path) \(option.command)"
-                        } else {
-                            fullCommand = "\(option.commandName) \(option.command)"
-                        }
-                        try await executeCommand(fullCommand)
                     }
                 } catch {
                     await MainActor.run {
