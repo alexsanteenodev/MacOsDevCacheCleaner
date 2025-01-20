@@ -44,7 +44,7 @@ struct CacheOption: Identifiable {
 }
 
 struct ContentView: View {
-    @State private var cacheOptions = [
+    @State internal var cacheOptions = [
         CacheOption(title: "Docker", 
                    description: "Clean Docker system and unused images", 
                    command: "",
@@ -411,6 +411,7 @@ struct ContentView: View {
                             }
                         }
                         .toggleStyle(.checkbox)
+                        .accessibilityIdentifier("SelectAllButton")
                         #if compiler(>=5.9)
                         .onChange(of: isAllSelected) { _, newValue in
                             for index in cacheOptions.indices where cacheOptions[index].isAvailable {
@@ -469,6 +470,7 @@ struct ContentView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
+                .accessibilityIdentifier("CleanSelectedButton")
                 .disabled(isLoading || !cacheOptions.contains { $0.isSelected })
                 .padding(.horizontal)
             }
@@ -528,7 +530,7 @@ struct ContentView: View {
         }
     }
     
-    private func executeCommand(_ command: String) async throws {
+    internal func executeCommand(_ command: String) async throws {
         let process = Process()
         let pipe = Pipe()
         
@@ -688,6 +690,7 @@ struct CacheOptionRow: View {
             Toggle("", isOn: $option.isSelected)
                 .toggleStyle(.checkbox)
                 .disabled(!option.isAvailable)
+                .accessibilityIdentifier(option.title)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(option.title)
