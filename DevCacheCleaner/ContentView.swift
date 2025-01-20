@@ -73,8 +73,36 @@ struct ContentView: View {
                    }),
         CacheOption(title: "Xcode", 
                    description: "Clean Xcode derived data and archives", 
-                   command: "rm -rf ~/Library/Developer/Xcode/DerivedData/* ~/Library/Developer/Xcode/Archives/*",
-                   commandName: "rm"),
+                   command: "",
+                   commandName: "",
+                   cleanAction: {
+                       let fileManager = FileManager.default
+                       let homeURL = fileManager.homeDirectoryForCurrentUser
+                       let derivedDataURL = homeURL.appendingPathComponent("Library/Developer/Xcode/DerivedData")
+                       let archivesURL = homeURL.appendingPathComponent("Library/Developer/Xcode/Archives")
+                       
+                       do {
+                           // Clean DerivedData
+                           if fileManager.fileExists(atPath: derivedDataURL.path) {
+                               let derivedContents = try fileManager.contentsOfDirectory(at: derivedDataURL, 
+                                                                                      includingPropertiesForKeys: nil)
+                               for url in derivedContents {
+                                   try? fileManager.removeItem(at: url)
+                               }
+                           }
+                           
+                           // Clean Archives
+                           if fileManager.fileExists(atPath: archivesURL.path) {
+                               let archiveContents = try fileManager.contentsOfDirectory(at: archivesURL, 
+                                                                                       includingPropertiesForKeys: nil)
+                               for url in archiveContents {
+                                   try? fileManager.removeItem(at: url)
+                               }
+                           }
+                       } catch {
+                           throw error
+                       }
+                   }),
         CacheOption(title: "NPM", 
                    description: "Clean NPM cache", 
                    command: "cache clean --force",
