@@ -12,6 +12,7 @@ final class DevCacheCleanerTests: XCTestCase {
     var fileManager: FileManager!
     var testDirectory: URL!
     var contentView: ContentView!
+    var viewModel: ContentViewModel!
     
     override func setUpWithError() throws {
         super.setUp()
@@ -19,11 +20,13 @@ final class DevCacheCleanerTests: XCTestCase {
         testDirectory = fileManager.temporaryDirectory.appendingPathComponent("DevCacheCleanerTests")
         try? fileManager.createDirectory(at: testDirectory, withIntermediateDirectories: true)
         contentView = ContentView()
+        viewModel = contentView.viewModel
     }
     
     override func tearDownWithError() throws {
         try? fileManager.removeItem(at: testDirectory)
         contentView = nil
+        viewModel = nil
         super.tearDown()
     }
     
@@ -114,7 +117,7 @@ final class DevCacheCleanerTests: XCTestCase {
     
     // Test Docker cache cleaning action
     func testDockerCacheCleanAction() async throws {
-        let dockerOption = await contentView.cacheOptions.first { $0.title == "Docker" }
+        let dockerOption = await viewModel.cacheOptions.first { $0.title == "Docker" }
         XCTAssertNotNil(dockerOption)
         
         guard let cleanAction = dockerOption?.cleanAction else {
@@ -135,7 +138,7 @@ final class DevCacheCleanerTests: XCTestCase {
     
     // Test Homebrew cache cleaning action
     func testHomebrewCacheCleanAction() async throws {
-        let brewOption = await contentView.cacheOptions.first { $0.title == "Homebrew" }
+        let brewOption = await viewModel.cacheOptions.first { $0.title == "Homebrew" }
         XCTAssertNotNil(brewOption)
         
         guard let cleanAction = brewOption?.cleanAction else {
@@ -158,7 +161,7 @@ final class DevCacheCleanerTests: XCTestCase {
     
     // Test Library cache cleaning action
     func testLibraryCacheCleanAction() async throws {
-        let libraryOption = await contentView.cacheOptions.first { $0.title == "General Library Cache" }
+        let libraryOption = await viewModel.cacheOptions.first { $0.title == "General Library Cache" }
         XCTAssertNotNil(libraryOption)
         
         guard let cleanAction = libraryOption?.cleanAction else {
