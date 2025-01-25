@@ -113,15 +113,13 @@ class ContentViewModel: ObservableObject {
         // Check Docker.app installation
         let dockerApp = "/Applications/Docker.app"
         guard fileManager.fileExists(atPath: dockerApp) else {
-            throw NSError(domain: "", code: 1, 
-                         userInfo: [NSLocalizedDescriptionKey: "Docker.app is not installed. Please install Docker Desktop for Mac first."])
+            throw CacheCleanerError.applicationNotInstalled("Docker Desktop")
         }
         
         // Check if Docker.app is running
         let workspace = NSWorkspace.shared
         guard workspace.runningApplications.contains(where: { $0.bundleIdentifier == "com.docker.docker" }) else {
-            throw NSError(domain: "", code: 2, 
-                         userInfo: [NSLocalizedDescriptionKey: "Docker.app is not running. Please start Docker Desktop first."])
+            throw CacheCleanerError.applicationNotRunning("Docker Desktop")
         }
         
         let homeURL = fileManager.homeDirectoryForCurrentUser
@@ -129,10 +127,14 @@ class ContentViewModel: ObservableObject {
         let dockerGroupPath = homeURL.appendingPathComponent("Library/Group Containers/group.com.docker")
         let dockerHomePath = homeURL.appendingPathComponent(".docker")
         
-        try await cleanDockerPaths(fileManager: fileManager, 
-                                 dockerDataPath: dockerDataPath,
-                                 dockerGroupPath: dockerGroupPath,
-                                 dockerHomePath: dockerHomePath)
+        do {
+            try await cleanDockerPaths(fileManager: fileManager, 
+                                     dockerDataPath: dockerDataPath,
+                                     dockerGroupPath: dockerGroupPath,
+                                     dockerHomePath: dockerHomePath)
+        } catch {
+            throw CacheCleanerError.cleaningFailed("Docker", error)
+        }
     }
     
     private func cleanDockerPaths(fileManager: FileManager,
